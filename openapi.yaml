@@ -1,0 +1,362 @@
+openapi: 3.1.0
+info:
+  title: JetBrains Products API
+  description: API to fetch JetBrains product release information.
+  version: 1.0.0
+servers:
+  - url: https://data.services.jetbrains.com
+    description: JetBrains API server
+paths:
+  /products:
+    get:
+      operationId: getProductInfo
+      summary: Fetch the JetBrains product information.
+      description: |
+        Fetches information about JetBrains products with the option to filter by the type of release, product code, and major version.
+      parameters:
+        - name: release.type
+          in: query
+          required: true
+          description: Type of release (e.g., `release` for stable releases, `eap` for early access releases, `rc` for release candidates).
+          schema:
+            type: string
+            default: release
+            enum:
+              - release
+              - eap
+              - rc
+        - name: code
+          in: query
+          required: true
+          description: "Filter results by JetBrains product code. Valid options are: AC, CL, GO, IIU, IIC, PCP, PCC, PS, RC, RD, RM, RS, and WS"
+          schema:
+            type: string
+            default: IIU
+            enum:
+              - AC
+              - CL
+              - GO
+              - IIU
+              - IIC
+              - PCP
+              - PCC
+              - PS
+              - RC
+              - RD
+              - RM
+              - RS
+              - WS
+        - name: latest
+          in: query
+          required: true
+          description: If `true`, only returns the latest release.
+          schema:
+            type: boolean
+            default: true
+        - name: majorVersion
+          in: query
+          required: false
+          description: The major version of the product to filter by. Major versions are in the format `<number>.<number>`.
+          schema:
+            type: string
+            pattern: '^\d+\.\d+$'
+      responses:
+        "200":
+          description: A list of JetBrains product releases.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                      description: Product code.
+                    intellijProductCode:
+                      type: string
+                      description: IntelliJ-specific product code.
+                    alternativeCodes:
+                      type: array
+                      items:
+                        type: string
+                      description: Alternative codes for the product.
+                    salesCode:
+                      type: string
+                      description: Sales code of the product.
+                    name:
+                      type: string
+                      description: Full product name.
+                    productFamilyName:
+                      type: string
+                      description: Name of the product family.
+                    link:
+                      type: string
+                      format: uri
+                      description: Product homepage link.
+                    description:
+                      type: string
+                      description: Product description.
+                    tags:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                      description: List of product tags.
+                    types:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                      description: Product types.
+                    categories:
+                      type: array
+                      items:
+                        type: string
+                      description: Product categories.
+                    releases:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          date:
+                            type: string
+                            format: date
+                            description: Release date.
+                          type:
+                            type: string
+                            description: Type of release.
+                          downloads:
+                            type: object
+                            additionalProperties:
+                              type: object
+                              properties:
+                                link:
+                                  type: string
+                                  format: uri
+                                  description: Download link.
+                                size:
+                                  type: integer
+                                  format: int64
+                                  description: Size of the file in bytes.
+                                checksumLink:
+                                  type: string
+                                  format: uri
+                                  description: Link to the checksum file.
+                          patches:
+                            type: object
+                            additionalProperties:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  fromBuild:
+                                    type: string
+                                    description: Build number from which the patch can be applied.
+                                  link:
+                                    type: string
+                                    format: uri
+                                    description: Patch download link.
+                                  size:
+                                    type: integer
+                                    format: int64
+                                    description: Patch file size in bytes.
+                                  checksumLink:
+                                    type: string
+                                    format: uri
+                                    description: Patch checksum link.
+                          notesLink:
+                            type: string
+                            format: uri
+                            description: Link to release notes.
+                          licenseRequired:
+                            type: boolean
+                            description: Whether a license is required.
+                          version:
+                            type: string
+                            description: Release version.
+                          majorVersion:
+                            type: string
+                            description: Major version number.
+                          build:
+                            type: string
+                            description: Build number.
+                          whatsnew:
+                            type: string
+                            description: Summary of new features and fixes in the release.
+                          uninstallFeedbackLinks:
+                            type: object
+                            additionalProperties:
+                              type: string
+                              format: uri
+                            description: Links for uninstall feedback.
+                    distributions:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: Name of the distribution.
+                          extension:
+                            type: string
+                            description: File extension of the distribution.
+                    forSale:
+                      type: boolean
+                      description: Indicates whether the product is for sale.
+        "400":
+          description: Invalid request (e.g., invalid product code).
+        "500":
+          description: Server error.
+
+  /products/releases:
+    get:
+      operationId: getReleaseInfo
+      summary: Fetch the JetBrains product release information.
+      description: |
+        Retrieves information about JetBrains product releases with the option to filter by the type of release, product code, and major version.
+      parameters:
+        - name: release.type
+          in: query
+          required: true
+          description: Type of release (e.g., `release` for stable releases, `eap` for early access releases, `rc` for release candidates).
+          schema:
+            type: string
+            default: release
+            enum:
+              - release
+              - eap
+              - rc
+        - name: code
+          in: query
+          required: true
+          description: "Filter results by JetBrains product code. Valid options are: AC, CL, GO, IIU, IIC, PCP, PCC, PS, RC, RD, RM, RS, and WS"
+          schema:
+            type: string
+            default: IIU
+            enum:
+              - AC
+              - CL
+              - GO
+              - IIU
+              - IIC
+              - PCP
+              - PCC
+              - PS
+              - RC
+              - RD
+              - RM
+              - RS
+              - WS
+        - name: latest
+          in: query
+          required: true
+          description: If `true`, only returns the latest release.
+          schema:
+            type: boolean
+            default: true
+        - name: majorVersion
+          in: query
+          required: false
+          description: The major version of the product to filter by. Major versions are in the format `<number>.<number>`.
+          schema:
+            type: string
+            pattern: '^\d+\.\d+$'
+      responses:
+        '200':
+          description: Successful response with release details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      date:
+                        type: string
+                        format: date
+                        description: Release date.
+                      type:
+                        type: string
+                        description: Type of release (e.g., release, eap, beta).
+                      downloads:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            link:
+                              type: string
+                              format: uri
+                              description: Download link.
+                            size:
+                              type: integer
+                              description: File size in bytes.
+                            checksumLink:
+                              type: string
+                              format: uri
+                              description: Link to the checksum file.
+                      patches:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              fromBuild:
+                                type: string
+                                description: The build number from which this patch can be applied.
+                              link:
+                                type: string
+                                format: uri
+                                description: Patch download link.
+                              size:
+                                type: integer
+                                description: File size in bytes.
+                              checksumLink:
+                                type: string
+                                format: uri
+                                description: Link to the patch checksum file.
+                      notesLink:
+                        type: string
+                        format: uri
+                        description: Link to the release notes.
+                      licenseRequired:
+                        type: boolean
+                        description: Indicates if a license is required for this version.
+                      version:
+                        type: string
+                        description: Version of the release.
+                      majorVersion:
+                        type: string
+                        description: Major version of the release.
+                      build:
+                        type: string
+                        description: Build number of the release.
+                      whatsnew:
+                        type: string
+                        description: HTML content describing what's new in the release.
+                      uninstallFeedbackLinks:
+                        type: object
+                        additionalProperties:
+                          type: string
+                          format: uri
+                          description: Links to uninstall feedback pages for different platforms.
+                      printableReleaseType:
+                        type: string
+                        nullable: true
+                        description: Printable version of the release type, if available.
+        '400':
+          description: Bad request, invalid parameters.
+        '500':
+          description: Internal server error.
